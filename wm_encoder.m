@@ -6,6 +6,8 @@
 
 function wm_encoder
 
+clearvars;
+
 % Read an image as input.
 cimage = input('Image to Watermark: ','s');
 im = imread(cimage);
