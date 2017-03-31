@@ -11,28 +11,25 @@ cimage = input('Image to Watermark: ','s');
 im = imread(cimage);
 
 % Read a string as watermark.
-wm = input('Watermark Message (letters and numbers only): ','s');
+wm = input('Watermark Message: ','s');
 
-% Define the standard quantization matrix for compression.
-QP = [16  11  10  16  24  40  51  61;
-      12  12  14  19  26  58  60  55;
-      14  13  16  24  40  57  69  56;
-      14  17  22  29  51  87  80  62;
-      18  22  37  56  68 109 103  77;
-      24  35  55  64  81 104 113  92;
-      49  64  78  87 103 121 120 101;
-      72  92  95  98 112 100 103  99];
+% Validate length of message. We'll be using a BCH code with
+% n = 255, k = 199 that can correct 7 errors (2.7451% error rate).
+% Need make sure the message is < 199 mod 6 == 33 characters since
+% we'll be mapping characters to 6 bit binary sequences.
+bch_n = 255; bch_k = 199; word_size = 6;
+max_wm_len = floor(bch_k / word_size);
+
+wm_len = length(wm);
+if wm_len > max_wm_len
+    error('Error.\nMax watermark length is %d but your message is %d.', ...
+        max_wm_len, wm_len);
+end
+
   
 % Find the DCT of the image.
 im_dct = blockproc(double(im), [8 8], @(b) round(dct2(b.data)));
- 
-% Scale the quantization matrix by a scale factor,then scale the dct values
-% with it.
-scale_f = 0.5;
-QP_scale = QP .* scale_f;
-quant_dct= @(block_struct) round(block_struct.data ./ QP_scale)...
-    .* QP_scale;
-im_quant = blockproc(im_dct, [8 8], quant_dct);
+
 
 % The watermark will be a string of characters and letters. Each character
 % will be encoded as a digit 0 to 26 corresponding to its frequency in the
@@ -41,40 +38,67 @@ letter_freq = {' ', 'e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', ...
     'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', ...
     'x', 'q', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
-% Use a Matlab map container to map all the letter with a corresponding
-% numerical value (26 letters, 10 numbers, 1 space).
-letter_offsets = containers.Map(letter_freq, (0:length(letter_freq)-1));
+% Create decimal values for each letter, where most frequent letters get 
+% the smallest values.
+offsets = (0:length(letter_freq)-1);
+
+% Convert the decimal offsets to binary. Use base 6 since we have >32 values
+binary_offsets = num2cell(dec2bin(offsets, word_size), 2)';
+
+% Map letters -> binary
+letter_map = containers.Map(letter_freq, binary_offsets);
 
 % Convert the user inserted watermark phrase into lower case, then use the
 % map to convert it to a set of minimal offsets.
 wm = lower(wm);
 
-offsets = zeros(size(wm));
+% Convert the watermark phrase to a binary sequence
+% TODO: Preallocate space to satisfy warning.
+%       This is a bit tricky because I have to block-assign values
+%       to wm_bin_seq, which I don't think is possible??
+wm_bin_seq = [];
 for i = 1:length(wm)
-    if letter_offsets.isKey(wm(i))
-        offsets(i) = letter_offsets(wm(i));
+    if letter_map.isKey(wm(i))
+        % Append the binary value of the character to the sequence
+        wm_bin_seq = [wm_bin_seq letter_map(wm(i))];
     else
-        offsets(i) = 0;
+        % Append a ' ' if the character isn't in our map
+        wm_bin_seq = [wm_bin_seq letter_map(' ')];
     end
 end
+
+% We have a 6x(num chars) matrix that needs to be converted into a 1x(6 x num chars) vector
+wm_bin_seq = str2num(reshape(wm_bin_seq, 1, [])')';
+
+% Determine BCH correction code
+% Have to pad up to valid (n,k) tuples for BCH codes
+% See: https://www.mathworks.com/help/comm/ref/bchenc.html
+wm_bin_seq = [wm_bin_seq zeros(1, bch_k - length(wm_bin_seq))];
+wm_bch = bchenc(gf(wm_bin_seq, 1), bch_n, bch_k);
 
 % Determine the set of coordinates that correspond to the top-left corner
 % of each DCT block. The top left corner contains the largest DCT values
 % and inserting the watermark into those spots minimizes the deterioration
 % of image quality and increase of image size by maintaining the number of
 % zero coefficients.
-[Xs, Ys] = meshgrid((1:8:size(im_quant,1)), (1:8:size(im_quant,2)));
+[Xs, Ys] = meshgrid((1:8:size(im_dct,1)), (1:8:size(im_dct,2)));
 corners = [Xs(:) Ys(:)];
 
-% Add the encoded values to each block.
-for i = 1:length(offsets)
+% Add the binary values to each block
+for i = 1:length(wm_bch)
+    if wm_bch(i) == 1
+        offset = 2;
+    else
+        offset = 0;
+    end
+
     coord = corners(i,:);
     x = coord(1,1); y = coord(1,2);
-    im_quant(x,y) = im_quant(x,y) + offsets(1,i);
+    im_dct(x,y) = im_dct(x,y) + offset;
 end
 
 % Now using the watermark added DCT coefficients, construct and output the
 % watermarked image as Watermarked.tiff
-im_idct = blockproc(im_quant, [8 8], @(b) idct2(b.data));
+im_idct = blockproc(im_dct, [8 8], @(b) idct2(b.data));
 imwrite(uint8(im_idct),'Watermarked.tiff');
 disp('Watermarked.tiff was created')

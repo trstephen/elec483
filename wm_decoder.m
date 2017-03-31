@@ -5,16 +5,12 @@
 %--------------------------------------------------------------------------
 
 function wm_decoder
+% Read the watermarked and original images
+cimage = input('Watermarked image: ', 's');
+im_wm  = imread(cimage);
 
-% Read the original image as input.
-%cimage = input('Original Image: ','s');
-%im_org = imread(cimage);
-im_org=imread('lena.tiff');
-im_wm=imread('Watermarked.tiff');
-
-% Read the watermarked image as input.
-%cimage = input('Watermarked Image: ','s');
-%im_wm = imread(cimage);
+cimage = input('Original Image: ','s');
+im_org = imread(cimage);
 
 % Find the DCT coefficients of both images.
 im_org_dct = blockproc(double(im_org), [8 8], @(b) round(dct2(b.data)));
@@ -37,23 +33,53 @@ for i = 1:length(corners)
     wm_offsets(1,i) = diff(x,y);
 end
 
+% If error occured in IDCT it is biased to decreasing the value. Since we
+% originally mapped '1' -> 2 and '0' -> 0 we want the unmapping to be
+% -1,0 -> '0' and 1, 2 -> '1'
+for i = 1:length(wm_offsets)
+    if wm_offsets(i) > 0
+        wm_offsets(i) = 1;
+    else
+        wm_offsets(i) = 0;
+    end
+end
+
+% Set the parameters of the BCH code. These _must_ match wm_encoder.m!
+bch_n = 255; bch_k = 199; word_size = 6;
+
+% Truncate the corner values that aren't part of the BCH code
+wm_offsets = wm_offsets(1:bch_n);
+
+% Do the decode
+wm_bch_dec = bchdec(gf(wm_offsets, 1), bch_n, bch_k);
+
+% Remove the padding bits
+max_wm_len = floor(bch_k / word_size);
+wm_dec = wm_bch_dec(1:(max_wm_len * word_size));
+
+% Group the elements in our decoded vector into 6bit binary words.
+% Convert the words to their decimal value for use in the dec -> char map.
+dec_offsets = zeros(1, max_wm_len);
+for i = 1:max_wm_len
+    first_bit = (i-1)*word_size + 1;
+    last_bit = first_bit + (word_size-1);
+    word = wm_dec(first_bit:last_bit);
+    dec_offsets(i) = bin2dec(dec2bin(word.x)'); % vector of 0/1 -> binary char vector -> decimal
+end
+
 % Create a reverse mapping of letters to values, based on the container
 % map created in wm_encoder.m
 letter_freq = {' ', 'e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', ...
     'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', ...
     'x', 'q', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
-% Forward map.
-letter_offsets = containers.Map(letter_freq, (0:length(letter_freq)-1));
-
 % Reverse lookup map.
-offset_letters = containers.Map(values(letter_offsets), ...
-    keys(letter_offsets));
+offset_letters = containers.Map((0:length(letter_freq)-1), letter_freq);
 
 % Extract the watermark by running the offsets through the inverse map.
 phrase = '';
-for i = 1:length(wm_offsets)
-    offset = wm_offsets(1,i);
+for i = 1:length(dec_offsets)
+    offset = dec_offsets(1,i);
     if offset_letters.isKey(offset)
         phrase = strcat(phrase, offset_letters(offset));
     end
