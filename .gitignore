@@ -1,2 +1,13 @@
 Watermarked.tiff
 
+# latex stuff
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.lof
+*.log
+*.lot
+*.toc
+*.run.xml
+*.synctex.gz
