@@ -1,8 +1,19 @@
 \section{Introduction}\label{sec:intro}
-The act of watermarking is synonymous with digital documents.
-In fact, one would be hard pressed to find any sort of document, photo, or video on the internet, without some sort of watermarking or digital rights statement.
-The problem is that traditional watermarking are the relics of a bygone era.
-Most visual watermarking today relies on the brute-force technique of physically overlaying a secondary text or image branding over top of the content.
-While this method makes the watermarking obvious, it does not employ any clever techniques, or even attempt to minimize the loss of visual quality of the original content.
+\improvement[inline=true]{A lead in statement that highlights the problem of determining image progeny}
+Traditional image watermarks that place translucent text or images over a source image must balance a degraded viewing experience with ease of removal.
+Watermarks that are placed in the corner of an image rarely cover up important image features but can be removed trivially through cropping.
+Prominent watermarks can discourage unauthorized image use (see Figure~\ref{fig:thumbs-up-wm}) but are impractical for use cases where a rights-holder wants to prevent dissemination of a high fidelity image.
 
-This lack of an elegant digital watermarking solution led us to attempt to create a digital, invisible, embedded watermarking technique, for use on digital image files.
+\begin{figure}[tbph]
+  \centering
+  \includegraphics[width=0.7\linewidth]{graphics/thumbs-up-wm}
+  \caption{Stock image sites use overlay and footer watermarks to discourage unauthorized image use~\cite{stocklite:old-man}}
+  \label{fig:thumbs-up-wm}
+\end{figure}
+
+Image metadata (e.g.\ EXIF, IIPC, PLUS, Dublin Core) exists in the digital file header and leaves the source image unaltered.
+However, file metadata offers no protection against removal.\citeneeded{} An ideal digital watermark should be as inseparable from the source image as its namesake.
+
+In this paper we demonstrate a procedure for watermarking digital files with almost no degradation of source image quality.
+We take a plain language phrase and encode it in the image DCT blocks to make it an intrinsic part of the image that cannot be removed.
+The watermark phrase is recovered by comparison with an original, unwatermarked image.
