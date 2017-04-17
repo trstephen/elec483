@@ -1,7 +1,7 @@
 \section{Implementation}\label{sec:impl}
-This project was implemented through MATLAB and carried out in two stages outlined below.
-The encode stage takes in an image file and a watermark phrase and outputs a watermark embedded image.
-The decode stage takes in a watermarked image and an original image and outputs the extracted watermark in text format.
+The proof of concept was implemented in MATLAB with separate encode and decode stages.
+The encode stage takes an image file and a watermark phrase and outputs a watermark embedded image.
+The decode stage takes the watermarked and original images and outputs the extracted watermark message.
 
 \subsection{Encoding}
 \begin{figure}[tbph]
@@ -11,23 +11,26 @@ The decode stage takes in a watermarked image and an original image and outputs 
   \label{fig:encode}
 \end{figure}
 
-The watermark encoding function of this project is implemented through a MATLAB “m file”.
-The file reads an image as input and also reads a string from the user as the watermark message.
-The message must be in basic alphanumeric format and the length is limited to less than 33 characters.
-This character limit is due to the requirements of the error correction methods, which will be discussed in the following sections.
+Figure~\ref{fig:encode} shows the encoding process.
+The encode file prompts the user to supply a source image and message to embed.
+The message must be in basic alphanumeric format and the length is limited to 33 characters as a requirement for the BCH code.
 
-The blockproc function is used to obtain the 8x8 DCT coefficients of the input image.
-The watermark string is mapped letter by letter as a digit from 0 to 26, corresponding to its frequency in the english alphabet.
-By employing this mapping method, we ensure that the most frequently used letters are mapped to the smallest numerical values.
-The decimal values are converted to a base 6 binary format, and are then converted to a single long binary string.
+The letters of the watermark message are associated with a number corresponding to its frequency in the English language.\footnote{See: \url{https://en.wikipedia.org/wiki/Letter_frequency}}
+This ensures that letters the most frequent letters will have more 0s, and thus a smaller distortion, when mapped onto the source image.
+The numbers are converted into 6-bit binary values\footnote{The inclusion of letters \textit{and} numbers in the watermark character space pushes the total number of characters over 32, thus requiring 6 bits.} and form a binary sequence.
 
-In order to facilitate error correction, BCH coding was employed.
-BCH coding takes a binary sequence and appends a binary correction code sequence to it.
-This long binary string can be fed back into the BCH function, in the decoding stage, to produce an error-corrected binary sequence for our use in mapping back to the correct watermark message.
+The $DCT~\rightarrow~IDCT~\rightarrow~cast~to~\texttt{uint}$ process is \textit{lossy}, primarily because of the downcast to \texttt{uint}.
+To minimize ambiguous downcasting we map logical $0/1$ to integer $0/2$ offsets rather than $0/1$ and recover with $\le 0 \rightarrow 0$ and $> 0 \rightarrow 1$.
 
-The binary sequence with the BCH correction code is then inserted into the top left corner of each of the DCT blocks of the image, bit by bit, as an offset.
-By targeting those corners, the impact of the offsets on the quality of the overall image is minimized.
-Once the watermark sequence is embedded, the image is inverse DCT and outputted to the user, ready for decoding.
+Despite this precaution, unmapping errors occur with a rate $\approx 1\%$.
+In order to correct this, we apply a BCH code to the binary sequence to allow for error detection and correction.
+We use a BCH code with $n = 255$, $k = 199$ capable of correcting 7 errors (2.7451\% error rate).
+To apply the BCH code, we pad the binary watermark sequence with 0s so it has 199 bits.
+The BCH encoder returns a sequence of 255 bits that can now be embedded into the image.
+
+Next, we obtain the $8\times8$ block DCT of the image.
+Each binary value is mapped to the appropriate offset and added to the DC component of the DCT block, starting with the top left block.
+Once all 255 bits have been added to the DCT blocks, the image is reconstructed via Inverse DCT and written to an output file.
 
 \subsection{Decoding}
 \begin{figure}[tbph]
@@ -37,10 +40,9 @@ Once the watermark sequence is embedded, the image is inverse DCT and outputted 
   \label{fig:decode}
 \end{figure}
 
-Similar to encoding, the decoding function of this project was also implemented through a MATLAB “m file”.
-The file reads the watermarked image as an input, as well as the original, unwatermarked image.
-The DCT coefficients of both images are acquired and the top left corner values of each block is compared to the corresponding value from the other image.
-The difference is the offsets string.
+Figure~\ref{fig:decode} shows the process for retrieving the watermark message from the image.
+This process is not ``blind'' since it requires the original image to extract the offset values in DCT DC coefficients.
+Moreover, the values of $n$, $k$ for the BCH code and the structure of the character-to-binary map \textit{must} be shared by the encode and decode processes.
 
-This offsets string is then forced to a binary format, truncated to the correct length, and sent to through MATLAB’s BCH decoding function, where the correction code is employed in extracting the binary version of the original watermark message.
-This binary code is run through an inverse mapping process and the final alphanumeric message is presented to the user as the extracted watermark.
+After recovering the binary sequence, 6-bit words are mapped to their original characters with padding characters mapping to \texttt{" "} empty space.
+The user is presented with the extracted watermark.

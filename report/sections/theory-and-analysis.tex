@@ -1,8 +1,12 @@
 \section{Theory and analysis}\label{sec:t-and-a}
-Invisible digital watermarking means the ability to embed data in an image, in a manner that is recoverable, without causing significant alteration to the image or lowering its visual quality.
-The key components of this solution involve taking the DCT coefficients of an image, quantizing those coefficients, and embedding a numerical data string containing the watermark information, as numerical offsets, into the DCT coefficients of the image.
+\stub{We do the same thing as those guys (spooky terrorists?) who passed messages by offsetting rgb values}
 
-The extraction of the watermark is done through comparing the DCT coefficients of the original quantized image, with the DCT coefficients of the watermarked image.
-The offsets are mapped back to the numerical data string containing the watermark information.
+\stub{Does this method hurt PSNR more than ours?}
 
-\stub{Opportunity to talk in detail about the meaning of DCT coefficients, quantization}
+Unless specifically designed to be otherwise, the largest frequency component of an image is its DC component.
+The DCT process typically yields a DC value over 1000. Altering this value by $\pm 1$ results in almost no change to image quality.
+This is the core principle at the heart of many compression algorithms.\citeneeded{}
+
+Relative image quality is determined by the Peak Signal-to-Noise Ratio (PSNR) value, representing the effect of noise from the $DCT~\rightarrow~IDCT~\rightarrow~DCT$ process and distortion from the watermark.
+
+\maybe{BCH codes?}
