@@ -149,8 +149,8 @@ im_B_wm_name = sprintf('%s%s_wm.tiff', im_base_name, 'B');
 imwrite(im_wm_B,im_B_wm_name);
 
 % PSNR Comparisons!
-fprintf('      source             wm image           psnr   \n');
-fprintf('---------------------------------------------------\n');
+fprintf('      source             wm image           psnr    ssim   \n');
+fprintf('-----------------------------------------------------------\n');
 printPSNR(im_YCbCr_name, im_Y_wm_name);
 printPSNR(im_YCbCr_name, im_Cb_wm_name);
 printPSNR(im_YCbCr_name, im_Cr_wm_name);
@@ -159,5 +159,7 @@ printPSNR(im_RGB_name, im_G_wm_name);
 printPSNR(im_RGB_name, im_B_wm_name);
 
 function printPSNR(src, wm)
-    fprintf('%-20s %-20s %0.5f\n', src, wm, psnr(imread(wm), imread(src)));
+    im_wm = imread(wm); im_src = imread(src);
+    fprintf('%-20s %-20s %0.5f %0.5f\n',...
+        src, wm, psnr(im_wm, im_src), ssim(im_wm, im_src));
 end
