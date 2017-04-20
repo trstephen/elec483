@@ -26,9 +26,12 @@ if wm_len > max_wm_len
         max_wm_len, wm_len);
 end
 
+% Isolate the layer that will hold the watermark. If grayscale, this is the entire image.
+% If RGB, this will be R. (imread will always read image as RGB, even if source is YCbCr.)
+im_wm_layer = im(:,:,1);
   
 % Find the DCT of the image.
-im_dct = blockproc(double(im), [8 8], @(b) round(dct2(b.data)));
+im_dct = blockproc(double(im_wm_layer), [8 8], @(b) round(dct2(b.data)));
 
 
 % The watermark will be a string of characters and letters. Each character
@@ -100,5 +103,8 @@ end
 % Now using the watermark added DCT coefficients, construct and output the
 % watermarked image as Watermarked.tiff
 im_idct = blockproc(im_dct, [8 8], @(b) idct2(b.data));
-imwrite(uint8(im_idct),'Watermarked.tiff');
+
+% Write the watermarked layer back into the original image.
+im(:,:,1) = im_idct;
+imwrite(uint8(im),'Watermarked.tiff');
 disp('Watermarked.tiff was created')
