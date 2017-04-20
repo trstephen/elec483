@@ -13,8 +13,8 @@ cimage = input('Original Image: ','s');
 im_org = imread(cimage);
 
 % Find the DCT coefficients of both images.
-im_org_dct = blockproc(double(im_org), [8 8], @(b) round(dct2(b.data)));
-im_wm_dct = blockproc(double(im_wm), [8 8], @(b) round(dct2(b.data)));
+im_org_dct = blockproc(double(im_org(:,:,1)), [8 8], @(b) round(dct2(b.data)));
+im_wm_dct = blockproc(double(im_wm(:,:,1)), [8 8], @(b) round(dct2(b.data)));
 
 % Determine the set of coordinates that correspond to the top-left corner
 % of each DCT block, using the original image.
