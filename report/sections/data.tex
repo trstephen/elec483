@@ -1,0 +1,41 @@
+\section{Data}\label{sec:data}
+Working versions of encoder and decoder scripts are available at \url{https://github.com/trstephen/elec483}.
+The scripts will embed and extract a text watermark from a provided grayscale or color image.
+
+To evaluate the effects on image quality  with spatial and frequency alterations, we compared the method described in Section~\ref{sec:impl} to one that embedds the binary sequence without the BCH code directly in the image grayscale values.
+This spatial embedding method produced a PSNR of 49.3924, significantly less than the PSNR of 58.7447 with our frequency embedding method.\improvement{why?}
+
+We also attempted to determined the best ``layer'' to embed the watermark in a color image.
+We used a couple color images, each with RGB and YCbCr encoded variants.
+The results in Table~\ref{tbl:color-psnr} show that embedding a watermark in any RGB layer causes less of a decrease in PSNR than embedding it in any YCbCR layer.\improvement{why?}
+
+\begin{table}[htpb]
+  \centering
+  \caption{Effects on PSNR after embedding a watermark in a single layer}
+  \label{tbl:color-psnr}
+  \begin{tabular}{@{}lcl@{}}
+    \toprule
+    \multicolumn{1}{c}{Source Image} & Layer & \multicolumn{1}{c}{PSNR}     \\
+    \midrule
+    \multirow{3}{*}{peppersYCbCr}
+       & Y   & 58.91533 \\
+       & Cb  & 58.12800 \\
+       & Cr  & 58.95000 \\
+    &  &  \\
+    \multirow{3}{*}{peppersRGB}
+       & R   & 63.60164 \\
+       & G   & 63.74127 \\
+       & B   & 63.70763 \\
+    &  &  \\
+    \multirow{3}{*}{fruitsYCbCr}
+      & Y   & 58.88691 \\
+      & Cb  & 57.95389 \\
+      & Cr  & 59.07317 \\
+    &  &  \\
+    \multirow{3}{*}{fruitsRGB}
+      & R   & 63.88637 \\
+      & G   & 63.69708 \\
+      & B   & 63.59464 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

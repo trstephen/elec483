@@ -27,7 +27,7 @@
 
 
 % preserve default font for URLs
-\renewcommand*{\UrlFont}{\rmfamily}		
+\renewcommand*{\UrlFont}{\rmfamily}
 
 %% Graphics
 %% --------------------
@@ -40,19 +40,20 @@
 \usepackage{
 	graphicx,			% allows insertion of images
 %	subfigure,			% allows subfigures (a), (b), etc.
-}				
-\graphicspath{ {../graphics/} }	% (graphicx) relative path to graphics folder				
+}
+\graphicspath{ {../graphics/} }	% (graphicx) relative path to graphics folder
 
 %% Tables
 %% --------------------------
 \usepackage{
-	booktabs,			% better tables, discourages vertical rulings
-	multicol,			% allow multi columns
+  booktabs,			% better tables, discourages vertical rulings
+  multicol,			% allow multi columns
+  multirow,
 }
 
 %% Layout Alteration
 %% --------------------------
-\usepackage{			
+\usepackage{
 %	caption,			% line breaks in captions with \\
 %	changepage,	  % change margins for PARTS of pages with (adjustwidth)
 	geometry,			% change the margins for specific PAGES
@@ -64,7 +65,7 @@
 	a4paper, 			% paper size
 	hmargin=1in,  % horizontal margins
 	vmargin=1in,  % vertical margins
-}	
+}
 
 
 %% Units
@@ -176,7 +177,7 @@
 \input{sections/intro}
 \input{sections/theory-and-analysis}
 \input{sections/implementation}
-\input{sections/examples}
+\input{sections/data}
 \input{sections/discussion}
 \input{sections/conclusion}
 

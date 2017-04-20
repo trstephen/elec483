@@ -20,9 +20,20 @@ This ensures that letters the most frequent letters will have more 0s, and thus 
 The numbers are converted into 6-bit binary values\footnote{The inclusion of letters \textit{and} numbers in the watermark character space pushes the total number of characters over 32, thus requiring 6 bits.} and form a binary sequence.
 
 The $DCT~\rightarrow~IDCT~\rightarrow~cast~to~\texttt{uint}$ process is \textit{lossy}, primarily because of the downcast to \texttt{uint}.
-To minimize ambiguous downcasting we map logical $0/1$ to integer $0/2$ offsets rather than $0/1$ and recover with $\le 0 \rightarrow 0$ and $> 0 \rightarrow 1$.
+To minimize ambiguous downcasting we use an offset generation mapping $x \mapsto y$ and recovery mapping $ y^{\prime} \mapsto x^{\prime}$ defined as:
+\begin{align*}
+y_i = \begin{cases}
+0, & x_i = 0\\
+2, & x_i = 1
+\end{cases}
+&&
+x^{\prime}_i = \begin{cases}
+0, & y^{\prime}_i \le 0 \\
+1, & y^{\prime}_i > 0
+\end{cases}
+\end{align*}
 
-Despite this precaution, unmapping errors occur with a rate $\approx 1\%$.
+Despite this precaution, recovery errors occur with a rate $\approx 1\%$.
 In order to correct this, we apply a BCH code to the binary sequence to allow for error detection and correction.
 We use a BCH code with $n = 255$, $k = 199$ capable of correcting 7 errors (2.7451\% error rate).
 To apply the BCH code, we pad the binary watermark sequence with 0s so it has 199 bits.
