@@ -3,7 +3,7 @@ The proof of concept was implemented in MATLAB with separate encode and decode s
 The encode stage takes an image file and a watermark phrase and outputs a watermark embedded image.
 The decode stage takes the watermarked and original images and outputs the extracted watermark message.
 
-\subsection{Encoding}
+\subsection{Encoding}\label{sec:enc}
 \begin{figure}[tbph]
   \centering
   \includegraphics[width=0.75\linewidth]{graphics/encode}
@@ -20,18 +20,19 @@ This ensures that letters the most frequent letters will have more 0s, and thus 
 The numbers are converted into 6-bit binary values\footnote{The inclusion of letters \textit{and} numbers in the watermark character space pushes the total number of characters over 32, thus requiring 6 bits.} and form a binary sequence.
 
 The $DCT~\rightarrow~IDCT~\rightarrow~cast~to~\texttt{uint}$ process is \textit{lossy}, primarily because of the downcast to \texttt{uint}.
-To minimize ambiguous downcasting we use an offset generation mapping $x \mapsto y$ and recovery mapping $ y^{\prime} \mapsto x^{\prime}$ defined as:
+To minimize ambiguous downcasting we use an offset generation mapping $m,x \mapsto x^{\prime}$ and recovery mapping $ x,x^{\prime} \mapsto m$ defined as:
 \begin{align*}
-y_i = \begin{cases}
-0, & x_i = 0\\
-2, & x_i = 1
+x^{\prime}_i = \begin{cases}
+x_i + 0, & m_i = 0\\
+x_i + 2, & m_i = 1
 \end{cases}
 &&
-x^{\prime}_i = \begin{cases}
-0, & y^{\prime}_i \le 0 \\
-1, & y^{\prime}_i > 0
+m_i = \begin{cases}
+0, & x^{\prime}_i - x_i \le 0 \\
+1, & x^{\prime}_i - x_i> 0
 \end{cases}
 \end{align*}
+where $x$ is the original image, $x^{\prime}$ is the watermarked image and $m$ is the BCH-coded message.
 
 Despite this precaution, recovery errors occur with a rate $\approx 1\%$.
 In order to correct this, we apply a BCH code to the binary sequence to allow for error detection and correction.
