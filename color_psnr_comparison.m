@@ -6,6 +6,7 @@ im_base_name = input('Image root name: ', 's');
 im_YCbCr_name = strcat(im_base_name, 'YCbCr.tiff');
 im_YCbCr = Tiff(im_YCbCr_name, 'r');
 [im_Y, im_Cb, im_Cr] = read(im_YCbCr);
+close(im_YCbCr);
 
 im_RGB_name = strcat(im_base_name, 'RGB.tiff');
 im_RGB = imread(im_RGB_name);
