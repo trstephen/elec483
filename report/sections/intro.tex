@@ -1,0 +1,21 @@
+\section{Introduction}\label{sec:intro}
+Digital watermarking is the process of embedding information in an image to establish ownership and prevent unauthorized distribution.
+Traditional image watermarks that place translucent text or images over a source image must balance a degraded viewing experience with ease of removal.
+Watermarks that are placed in the corner of an image rarely cover up important image features but can be removed trivially through cropping.
+Prominent watermarks can discourage unauthorized image use (see Figure~\ref{fig:thumbs-up-wm}) but are impractical for use cases where a rights-holder wants to prevent dissemination of a high fidelity, minimally distorted image.
+
+\begin{figure}[tbph]
+  \centering
+  \includegraphics[width=0.7\linewidth]{graphics/thumbs-up-wm}
+  \caption{Stock image sites use overlay and footer watermarks to discourage unauthorized image use~\cite{stocklite:old-man}}
+  \label{fig:thumbs-up-wm}
+\end{figure}
+
+Image metadata (e.g.\ EXIF, IIPC, PLUS, Dublin Core) exists in the digital file header and leaves the source image unaltered.
+However, file metadata offers no protection against removal.\citeneeded{} An ideal digital watermark should be as inseparable from the source image as its namesake.
+
+In this paper we demonstrate a procedure for watermarking digital files with almost no degradation of source image quality.
+In Section~\ref{sec:impl} we show how to take a plain language phrase and encode it in the image DCT blocks and then recover it.
+Section~\ref{sec:data} shows that embedding the watermark in the frequency domain preserves image quality better than embedding a shorter message in the spacial domain.
+Section~\ref{sec:discussion} considers the weaknesses of this procedure and outlines a method for two-party private communication via watermarked image exchange.
+It also proposes a method for blind watermark extraction.
