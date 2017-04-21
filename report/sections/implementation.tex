@@ -15,7 +15,7 @@ Figure~\ref{fig:encode} shows the encoding process.
 The encode file prompts the user to supply a source image and message to embed.
 The message must be in basic alphanumeric format and the length is limited to 33 characters as a requirement for the BCH code.
 
-The letters of the watermark message are associated with a number corresponding to its frequency in the English language.\footnote{See: \url{https://en.wikipedia.org/wiki/Letter_frequency}}
+The letters of the watermark message are associated with a number corresponding to its frequency in the English language.\footnote{See:\ \url{https://en.wikipedia.org/wiki/Letter_frequency}}
 This ensures that the most frequent letters will have more 0s, and thus a smaller distortion, when mapped onto the source image.
 The numbers are converted into 6-bit binary values\footnote{The inclusion of letters \textit{and} numbers in the watermark character space pushes the total number of characters over 32, thus requiring 6 bits.} and form a binary sequence.
 
