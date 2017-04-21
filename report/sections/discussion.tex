@@ -1,6 +1,4 @@
 \section{Discussion}\label{sec:discussion}
-\maybe{Troubles with errors and BCH? Feel like this is covered in Implementation...}
-
 We mention in Section~\ref{sec:intro} that the watermark cannot be removed from the image.
 This does not mean that the watermark cannot be destroyed.
 Since the extraction method relies on block-processing the images, any change to the block construction will drastically alter the resulting DCT.
@@ -8,12 +6,11 @@ The watermark can be destroyed trivially by removing a single row of pixels!
 The security of this method relies on its ability to remain undetected.
 
 If two parties wanted to communicate via exchange of watermarked images they would both need to have a copy of an original image to perform the message extraction.
-In order to avoid creating a suspicious communication pattern where they exchange and re-exchange the same image regularly the two parties should attempt to re-use one image for multiple exchanges.
+In order to avoid creating a suspicious communication pattern where they exchange and re-exchange the same image regularly, the two parties should attempt to re-use one image for multiple exchanges.
 Posting ``reaction images'' and image memes on social media or other platforms would provide an excellent cover for sharing watermarked images since heavy image re-use is encouraged by the culture.
 
 \subsection{Further work}
 The motivated, row-dropping attacker problem notwithstanding, the need for an original image for decoding is a significant drawback for this method.
-%Embedding the watermark so that it can be extracted without knowledge of the source image is Blind Source Separation, and is an open research problem in signal and image processing.\improvement{why is this so hard? Does this apply to our case?}
 Suppose instead we used the BCH encoded message to set the DC values of the blocks to specific values that could be extracted via modular division.
 The mappings would be
 \begin{align*}
@@ -28,4 +25,9 @@ m_i = \begin{cases}
 \end{cases}
 \end{align*}
 Observe that the recovery mapping is independent of the original image $x$.
-The modulus 4 is chosen avoid the casting errors described in Section~\ref{sec:enc} that would likely occur if a $0/1~\mapsto~\text{even}/\text{odd}$ mapping were used.
+The modulus 4 is chosen to avoid the casting errors described in Section~\ref{sec:enc} that would likely occur if a $0/1~\mapsto~\text{even}/\text{odd}$ mapping were used.
+
+If we assume that the watermark is unknown (hence, not targeted for removal) to a party that wants to disseminate a controlled image then we should check that common transformations that occur when images are copied, saved and uploaded do not destroy the watermark.
+The watermark should be robust against compression algorithms that attempt to retain maximal information in the frequency domain (e.g.\ quantization) since the DC component will be preserved.
+Image format changes, such as RGB $\rightarrow$ YCbCr, may corrupt the watermark since the conversion involves rounding, which was the source of the errors described in Section~\ref{sec:enc}.
+The robustness against transformation may be controlled by altering the $n,k$ values for the BCH code.

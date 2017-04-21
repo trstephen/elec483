@@ -20,7 +20,7 @@ Figure~\ref{fig:wm} shows the effect of adding a watermark to an image.
 
 To evaluate the effects on image quality  with spatial and frequency alterations, we compared the method described in Section~\ref{sec:impl} to one that embeds the binary sequence without the BCH code directly in the image grayscale values.
 This spatial embedding method produced a PSNR of 49.3924, significantly less than the PSNR of 58.7447 with our frequency embedding method.
-The frequency embedding method performs better because each message bit is encoded in a block of 64 pixels, rather than concentrated into single pixel.
+The frequency embedding method performs better because each message bit is encoded in a block of 64 pixels, rather than concentrated into a single pixel.
 Additionally, the relative change in value from embedding a bit is smaller in the frequency domain.
 
 We also attempted to determined the best ``layer'' to embed the watermark in a color image.
